@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/font-awesome-4.7.0/css/font-awesome.min.css">
+
+</head>
+<body>
+<div class="container-fluid">
+
+    <div class="row pt-3 pb-1" style="background-color: #E6E6E6">
+        <div class="col-1">
+            <h3>KGVisio</h3>
+        </div>
+        <div class="col-7">
+            <form class="form-inline">
+                <input class="form-control col-6" type="text" placeholder="刘德华" id="search-input">
+                <button class="btn btn-success ml-1" type="button" id="entity-query">实体查询</button>
+                <button type="button" class="btn btn-outline-success ml-1" data-toggle="collapse"
+                        data-target="#extend-query-panel" aria-expanded="false"
+                        id="extend-query-btn">扩展查询</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row pt-2 justify-content-center">
+        <div class="col-6 collapse" id="extend-query-panel">
+            <div class="card text-center collapse" >
+                <!-- Nav tabs -->
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active query-tab" data-toggle="tab" href="#entity-card" role="tab"
+                               id="entity-card-tab">实体卡片</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link query-tab" data-toggle="tab" href="#rel-eg" role="tab" id="rel-eg-tab">关系样例</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link query-tab" data-toggle="tab" href="#entity-retrieval" role="tab" id="entity-retrieval-tab">实体检索</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link query-tab" data-toggle="tab" href="#connect" role="tab" id="connect-tab">关联展示</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-block">
+                    <div class="tab-content">
+                        <div class="tab-pane active" role="tabpanel" id="entity-card">
+                            <div class="row  justify-content-center">
+                                <form class="form-inline">
+                                    <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0"
+                                           id="entity-card-input" placeholder="实体名">
+                                </form>
+                            </div>
+                        </div>
+                        <div class="tab-pane" role="tabpanel" id="rel-eg">
+                            <div class="row  justify-content-center">
+                                <form class="form-inline">
+                                    <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0"
+                                           id="rel-eg-input" placeholder="关系名">
+                                </form>
+                            </div>
+                        </div>
+                        <div class="tab-pane" role="tabpanel" id="entity-retrieval">
+                            <div class="row  justify-content-center">
+                                <form class="form-inline">
+                                    <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0"
+                                           id="entity-retrieval-input-1" placeholder="头实体">
+                                    <button type="button" class="btn btn-outline-primary btn-sm mr-2"
+                                            data-toggle="tooltip" data-placement="top" title="切换查询方向"
+                                            id="entity-retrieval-btn">
+                                        <i class="fa fa-arrow-left fa-lg" aria-hidden="true" id="entity-retrieval-icon"></i>
+                                    </button>
+                                    <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0"
+                                           id="entity-retrieval-input-2" placeholder="关系">
+                                </form>
+                            </div>
+                        </div>
+                        <div class="tab-pane" role="tabpanel" id="connect">
+                            <div class="row  justify-content-center">
+                                <form class="form-inline">
+                                    <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0"
+                                           id="connect-input-head" placeholder="头实体">
+                                    <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0"
+                                           id="connect-input-tail" placeholder="尾实体">
+                                    <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0"
+                                           id="connect-input-len" placeholder="长度">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-outline-primary btn-lg btn-block" id="extend-query-submit-btn">提交
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row pt-2 justify-content-center" id="loading">
+    </div>
+    <div class="row pt-2 justify-content-center" id="message">
+    </div>
+        <!--Display region-->
+    <div class="row pt-2 justify-content-center">
+        <div class="col-6" id="disambiguation">
+        </div>
+    </div>
+    <div class="row pt-2 justify-content-center">
+        <div class="col-6" id="entity-card-table">
+        </div>
+    </div>
+    <div class="row pt-2 justify-content-center">
+        <div class="col-6" id="content-table">
+        </div>
+    </div>
+    <div class="row pt-2 justify-content-center">
+        <style>
+            .sigma-tooltip {
+            background-color: rgb(249, 247, 237);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            border-radius: 6px;
+            }
+            .sigma-tooltip-header {
+            font-variant: small-caps;
+            font-size: 120%;
+            color: #437356;
+            border-bottom: 1px solid #aac789;
+            padding: 10px;
+            }
+            .sigma-tooltip-body {
+            padding: 10px;
+            }
+            .sigma-tooltip-body th {
+            color: #999;
+            text-align: left;
+            }
+            .sigma-tooltip-footer {
+            padding: 10px;
+            border-top: 1px solid #aac789;
+            }
+            .sigma-tooltip > .arrow {
+            border-width: 10px;
+            position: absolute;
+            display: block;
+            width: 0;
+            height: 0;
+            border-color: transparent;
+            border-style: solid;
+            }
+            .sigma-tooltip.top {
+            margin-top: -12px;
+            }
+            .sigma-tooltip.top > .arrow {
+            left: 50%;
+            bottom: -10px;
+            margin-left: -10px;
+            border-top-color: rgb(249, 247, 237);
+            border-bottom-width: 0;
+            }
+            .sigma-tooltip.bottom {
+            margin-top: 12px;
+            }
+            .sigma-tooltip.bottom > .arrow {
+            left: 50%;
+            top: -10px;
+            margin-left: -10px;
+            border-bottom-color: rgb(249, 247, 237);
+            border-top-width: 0;
+            }
+            .sigma-tooltip.left {
+            margin-left: -12px;
+            }
+            .sigma-tooltip.left > .arrow {
+            top: 50%;
+            right: -10px;
+            margin-top: -10px;
+            border-left-color: rgb(249, 247, 237);
+            border-right-width: 0;
+            }
+            .sigma-tooltip.right {
+            margin-left: 12px;
+            }
+            .sigma-tooltip.right > .arrow {
+            top: 50%;
+            left: -10px;
+            margin-top: -10px;
+            border-right-color: rgb(249, 247, 237);
+            border-left-width: 0;
+            }
+        </style>
+        <div class="col-6" id='vis-container' style="height:600px; width: 100%">
+        </div>
+    </div>
+</div>
+<!-- jQuery first, then Tether, then Bootstrap JS. -->
+<!--
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>-->
+<!--
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
+        integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
+        integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+        crossorigin="anonymous"></script>
+<script src="https://use.fontawesome.com/1ef4ca1a1a.js"></script>
+
+<script src="https://rawgit.com/Linkurious/linkurious.js/develop/dist/sigma.min.js"></script>
+<script src="https://rawgit.com/Linkurious/linkurious.js/develop/dist/plugins.min.js"></script>
+-->
+<script src="/static/jquery-3.2.1.min.js"></script>
+<script src="/static/tether.min.js"></script>
+<script src="/static/bootstrap.min.js"></script>
+<script src="/static/sigma.min.js"></script>
+<script src="/static/plugins.min.js"></script>
+<!--
+<script src="https://d3js.org/d3.v4.min.js"></script>
+-->
+<script type="text/javascript">
+
+    var selected_fun = "entity-card-tab";//Default first tab
+    var page = 0;
+    var dis_entities = {};
+    var blocked_query = null;
+    var blocked_url = null;
+    var card_title = null;
+    var num_of_pages = null;
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    });
+    $("#extend-query-btn").click(function () {
+        if ($(this).text() == "扩展查询") {
+            $(this).html("收起扩展查询");
+        }
+        else {
+            $(this).html("扩展查询");
+        }
+    });
+    $("#entity-retrieval-btn").click(function () {
+        if ($("#entity-retrieval-input-1").attr("placeholder") == "头实体") {
+            $("#entity-retrieval-input-1").attr("placeholder", "关系");
+            $("#entity-retrieval-input-2").attr("placeholder", "尾实体");
+            $("#entity-retrieval-icon").removeClass("fa-arrow-left");
+            $("#entity-retrieval-icon").addClass("fa-arrow-right");
+        }
+        else {
+            $("#entity-retrieval-input-1").attr("placeholder", "头实体");
+            $("#entity-retrieval-input-2").attr("placeholder", "关系");
+            $("#entity-retrieval-icon").removeClass("fa-arrow-right");
+            $("#entity-retrieval-icon").addClass("fa-arrow-left");
+        }
+    });
+    /*
+    $(".query-tab").click(function () {
+        selected_fun = $(this).attr("id");
+        page = 0;
+        dis_entities = {};
+        blocked_query = null;
+        blocked_url = null;
+    });
+    */
+    function show_msg(msg, type, time) {
+        var div_start = '<div class="alert alert-'+type+'" role="alert">';
+        var div_end= '</div>';
+        $("#message").html(div_start + msg + div_end).show().delay(time).fadeOut();
+    }
+    function loading() {
+        $("#loading").html('<img src="/static/hourglass.svg">');
+    }
+    function loading_finished() {
+        $("#loading").html('');
+    }
+    function refresh_setting() {
+        page = 0;
+        num_of_pages = 0;
+        dis_entities = {};
+        blocked_query = null;
+        blocked_url = null;
+    }
+    function clear_canvas() {
+        $("#entity-card-table").html("");
+        $("#content-table").html("");
+        $("#vis-container").html("");
+        $("#disambiguation").html("");
+    }
+    //
+    function thead(contents) {
+        var th_str = "";
+        for(var i  = 0; i < contents.length ; i++){
+            th_str += '<th>' + contents[i] + '</th>';
+        }
+        return '<thead><tr>'+th_str+'</tr></thead>';
+    }
+    function tbody(contents) {
+        var tbody_str = "";
+        for(var i = 0; i < contents.length; i++){
+            var tr_str = "";
+            tr_str += "<th scope='row'>"+contents[i][0] + "</th>";
+            for(var j = 1; j < contents[i].length; j++){
+                tr_str += "<td>" + contents[i][j] + "</td>";
+            }
+            tbody_str += "<tr>" + tr_str + "</tr>";
+        }
+        return "<tbody>" + tbody_str + "</tbody>";
+    }
+    function make_table(head_contents, body_contents) {
+        var thead_contents = thead(head_contents);
+        var tbody_contents = tbody(body_contents);
+        return "<table class='table'>" + tbody_contents + "</table>";
+    }
+    function make_card(title, content, footer) {
+        var div_end = '</div>';
+        var div_start = '<div class="card card-outline-primary text-center">';
+        var div_header_start = '<div class="card-header">';
+        var div_block_start = '<div class="card-block">';
+        var div_footer_start = '<div class="card-footer">';
+        if(footer == "")
+            return div_start + div_header_start + '<h5>'+title+'</h5>'+ div_end + div_block_start + content + div_end + div_end;
+        return div_start + div_header_start + '<h5>'+ title+'</h5>' + div_end + div_block_start + content + div_end +
+               div_footer_start + footer + div_end + div_end;
+    }
+    function add_dis_panel(title, polys) {
+        console.log(polys);
+        var disamiguition_panel = "";
+        for (var i = 0; i < polys.length; i++)
+            disamiguition_panel += '<li class="breadcrumb-item"><a href="#'+
+                polys[i]['key']+
+                '#'+
+                polys[i]['uid'] +
+                '" class="dis-item">' +
+                polys[i]['poly_name'] +
+                '</a></li>'
+        disamiguition_panel = '<ol class="breadcrumb">' + disamiguition_panel + '</ol>';
+        $("#disambiguation").append(make_card(title, disamiguition_panel, ""));
+    }
+    //
+    function write_content(data) {
+        if(selected_fun == 'entity-card-tab'){
+            draw_entity_card_tables(data);
+        }else if(selected_fun == 'rel-eg-tab'){
+            var table_contents = rel_eg_parse_response_data(data);
+            write_content_table(card_title, table_contents[0], table_contents[1]);
+        }else if(selected_fun == 'entity-retrieval-tab'){
+            if(data.length == 0){
+                var msg = '未检测到符合条件的实体';
+                show_msg(msg, 'warning', 1200);
+                return;
+            }
+            var table_contents = entity_retrieval_parse_response_data(data);
+            write_content_table(card_title, table_contents[0], table_contents[1]);
+        }else if(selected_fun == 'connect-tab'){
+            write_path_list(data);
+        }else if(selected_fun == 'entity-query-tab'){
+            draw_graph(data);
+        }else{
+            console.log("No tab to write.");
+        }
+    }
+    //
+    function write_content_table(title, head_contents, body_contents) {
+
+        var table_content = make_table(head_contents, body_contents);
+        var l1 = '<nav aria-label="Page navigation example">';
+        var l2 = '<ul class="pagination">';
+        var l3 = '<li class="page-item"><a class="page-link" href="#/query/extent/rel_eg/page/" id="pre">前一页</a></li>';
+        var l4 = '<li class="page-item"><a class="page-link" href="#/query/extent/rel_eg/page/" id="nxt">下一页</a></li>';
+        var l5 = '</ul>';
+        var l6 = '</nav>';
+        var num_page = '<span class="badge badge-default">'+(page+1)+'/'+num_of_pages+'</span>';
+        var pagination = l1+l2+l3+l4+l5+l6+num_page;
+        $("#content-table").html(make_card(title, table_content, pagination));
+    }
+    // Entity card
+    function draw_entity_card_tables(entity) {
+        console.log(entity);
+        if ($.isEmptyObject(entity)) {
+            console.log('Empty property');
+        }
+        else {
+            console.log('Non-empty property');
+            var i = 0;
+            var tables = "";
+            var poly = entity['title'];
+            var title = entity['name'];
+            for (var key in entity) {
+                if (key == "uid" || key == "name" || key == "title" || key == 'from')
+                    continue;
+                if (i % 3 == 0)
+                    tables += "<tr>";
+                tables += "<th>" + key + "</th>";
+                tables += "<td>";
+                console.log(entity[key]);
+                for (var j = 0; j < entity[key].length; j++)
+                    tables += entity[key][j];
+                tables += "</td>";
+                if ((i + 1) % 3 == 0)
+                    tables += "</tr>";
+                i += 1;
+            }
+            tables = '<table class="table table-sm table-info"><tbody>' + tables + '</tbody></table>'
+            if(poly!=""){
+                title += '（'+poly +'）';
+            }
+            $("#entity-card-table").html(make_card(title, tables, ""));
+        }
+    }
+    function entity_card() {
+        var entity_name = $("#entity-card-input").val();
+        if(entity_name == ""){
+            console.log('Empty Input');
+            return;
+        }
+        loading();
+        $.post("/query/extend/entity_card/", JSON.stringify({"entity": entity_name}), function (data, status) {
+            if(data['polys'].length == 0){
+                console.log("NULL");
+                var msg = '尚未添加实体 <strong>'+entity_name+'</strong>';
+                show_msg(msg, 'warning', 1200);
+            }else if(data['polys'].length == 1){
+                data['query']['entity'] = data['polys'][0]['uid'];
+                $.post("/query/extend/entity_card/confirm/", JSON.stringify(data['query']), function (rdata, status) {
+                    write_content(rdata['data']);
+                })
+            }else{
+                var name = data['query']['entity'];
+                blocked_query = data['query'];
+                blocked_url = '/query/extend/entity_card/confirm/';
+                dis_entities['entity'] = {'uid': "", "filled": false};
+                add_dis_panel("<strong>"+name+"</strong>"+"是一个多义项，请选择下面其中一项", data['polys']);
+            }
+            loading_finished();
+        });
+    }
+    // Relation example
+    function rel_eg_parse_response_data(data) {
+        var head_contents = ["#", "头实体", "尾实体"];
+        var body_contents = [];
+        for(var i = 0; i < data.length ; i++){
+            body_contents.push([( page * 10 + i + 1 ).toString(), data[i]['h'], data[i]['t']]);
+        }
+        return [head_contents, body_contents]
+    }
+    function rel_eg() {
+        var rel_name = $("#rel-eg-input").val();
+        loading();
+        $.post("/query/extend/rel_eg/", JSON.stringify({"rel_name": rel_name}), function (data, status) {
+            if(data['data'].length == 0){
+                var msg = '尚未添加关系 <strong>'+rel_name+'</strong>';
+                show_msg(msg, 'warning', 1200);
+            }else{
+                card_title = '关系为 '+'<strong>'+ rel_name + '</strong>' + ' 的元组展示';
+                num_of_pages = data['pages'];
+                write_content(data['data']);
+            }
+            loading_finished();
+        });
+    }
+    // Entity retrieval
+    function entity_retrieval_parse_response_data(data) {
+        if('tail' in data[0]){
+            var key = 'tail';
+            var head = "尾实体";
+        }
+        else{
+            var key = 'head';
+            var head = "头实体";
+        }
+        var head_contents = ["#", head];
+        var body_contents = [];
+        for(var i = 0; i < data.length ; i++){
+            body_contents.push([( page * 10 + i + 1 ).toString(), data[i][key]]);
+        }
+        return [head_contents, body_contents];
+    }
+    function entity_retrieval() {
+        var input1 = $("#entity-retrieval-input-1").val();
+        var input2 = $("#entity-retrieval-input-2").val();
+        if(input1 == "" || input2 == ""){
+            console.log("Empty Input");
+            return;
+        }
+        var obj = {};
+        if($("#entity-retrieval-input-1").attr("placeholder") == "头实体"){
+            obj["mode"] = "tail";
+            obj["entity"] = input1;
+            obj["rel"] = input2;
+            card_title = '<strong>'+input1+'</strong>'+ ' 的 ' + '<strong>'+input2+'</strong>';
+        }
+        else{
+            obj["mode"] = "head";
+            obj["entity"] = input2;
+            obj["rel"] = input1;
+            card_title = '<strong>'+ input1+ '</strong>' + ' 为 ' + '<strong>'+ input2 +'</strong>'+ ' 的 ';
+        }
+        $.post("/query/extend/entity_retrieval/", JSON.stringify(obj), function (data, status) {
+            if(data['polys'].length == 0){
+                console.log("NULL");
+                var msg = '未检索到符合条件的实体';
+                show_msg(msg, 'warning', 1200);
+            }else if(data['polys'].length == 1){
+                data['query']['entity'] = data['polys'][0]['uid'];
+                loading();
+                $.post("/query/extend/entity_retrieval/confirm/", JSON.stringify(data['query']), function (rdata, status) {
+                    num_of_pages = rdata['pages'];
+                    write_content(rdata['data']);
+                    loading_finished();
+                })
+            }else{
+                var name = data['query']['entity'];
+                blocked_query = data['query'];
+                blocked_url = '/query/extend/entity_retrieval/confirm/';
+                dis_entities['entity'] = {'uid': "", "filled": false};
+                add_dis_panel("<strong>"+name+"</strong>"+"是一个多义项，请选择下面其中一项", data['polys']);
+            }
+        });
+    }
+    //Connect
+    function write_path_list(data) {
+        var li = "";
+        var li_start = '<li class="list-group-item">';
+        var li_end = '</li>';
+        for(var i = 0; i < data.length; i++)
+            li += li_start + data[i] + li_end;
+        var ul_start = '<ul class="list-group">';
+        var ul_end = '</ul>';
+        var list = ul_start + li + ul_end;
+        var l1 = '<nav aria-label="Page navigation example">';
+        var l2 = '<ul class="pagination">';
+        var l3 = '<li class="page-item"><a class="page-link" href="#/query/extent/rel_eg/page/" id="pre">前一页</a></li>';
+        var l4 = '<li class="page-item"><a class="page-link" href="#/query/extent/rel_eg/page/" id="nxt">下一页</a></li>';
+        var l5 = '</ul>';
+        var l6 = '</nav>';
+        var num_page = '<span class="badge badge-default">'+(page+1)+'/'+num_of_pages+'</span>';
+        var pagination = l1+l2+l3+l4+l5+l6+num_page;
+        $("#content-table").html(make_card(card_title, list, pagination));
+    }
+    function connect(){
+        var head_entity = $("#connect-input-head").val();
+        var tail_entity = $("#connect-input-tail").val();
+        var path_len = $("#connect-input-len").val();
+        if(head_entity == "" || tail_entity == "" || path_len == ""){
+            console.log("Empty Input");
+            return;
+        }
+        var query = {"head": head_entity, "tail" : tail_entity, "len": path_len}
+        card_title = '<strong>'+head_entity+'</strong>'+ ' 到 ' + '<strong>'+tail_entity +'</strong>'+ ' 的路径展示';
+        $.post("/query/extend/connect/", JSON.stringify(query), function (data, status) {
+            if(data['polys']['head'].length == 0 || data['polys']['tail'].length == 0){
+                console.log("NULL");
+                var msg = '未检索到 <strong>'+head_entity+'</strong> 与 <strong>'+tail_entity+'</strong> 之间的长度不超过 <strong>'+path_len+'</strong> 的路径';
+                show_msg(msg, 'warning', 1200);
+            }else if(data['polys']['head'].length == 1 && data['polys']['tail'].length == 1){
+                data['query']['head'] = data['polys']['head'][0]['uid'];
+                data['query']['tail'] = data['polys']['tail'][0]['uid'];
+                loading();
+                $.post("/query/extend/connect/confirm/", JSON.stringify(data['query']), function (rdata, status) {
+                    num_of_pages = rdata['pages'];
+                    write_content(rdata['data']);
+                    loading_finished();
+                });
+            }else{
+                blocked_query = data['query'];
+                blocked_url = '/query/extend/connect/confirm/';
+                if(data['polys']['head'].length > 1){
+                    var head_name = data['query']['head'];
+                    dis_entities['head'] = {'uid': "", 'filled': false};
+                    add_dis_panel("<strong>"+head_name+"</strong>"+"是一个多义项，请选择下面其中一项", data['polys']['head']);
+                }
+                else{
+                    data['query']['head'] = data['polys']['head'][0]['uid'];
+                }
+                if(data['polys']['tail'].length > 1){
+                    var tail_name = data['query']['tail'];
+                    dis_entities['tail'] = {'uid': "", 'filled': false};
+                    add_dis_panel("<strong>"+tail_name+"</strong>"+"是一个多义项，请选择下面其中一项", data['polys']['tail']);
+                }
+                else{
+                    data['query']['tail'] = data['polys']['tail'][0]['uid'];
+                }
+            }
+        });
+    }
+
+    //Entity query
+    $("#entity-query").click(function () {
+        selected_fun = 'entity-query-tab';
+        console.log(selected_fun);
+        refresh_setting();
+        $("#entity-card-table").html("");
+        $("#content-table").html("");
+        $("#vis-container").html("");
+        $("#disambiguation").html("");
+
+        var query = $("#search-input").val();
+        $.post("/query/entity/", JSON.stringify({'entity': query}), function (data, status) {
+            if(data['polys'].length == 0){
+                console.log("NULL");
+                var msg = '尚未添加实体 <strong>'+query+'</strong>';
+                show_msg(msg, 'warning', 1200);
+            }else if(data['polys'].length == 1){
+                data['query']['entity'] = data['polys'][0]['uid'];
+                loading();
+                $.post("/query/entity/confirm/", JSON.stringify(data['query']), function (rdata, status) {
+                    draw_graph(rdata['data']);
+                    loading_finished();
+                })
+            }else{
+                var name = data['query']['entity'];
+                blocked_query = data['query'];
+                blocked_url = '/query/entity/confirm/';
+                dis_entities['entity'] = {'uid': "", "filled": false};
+                add_dis_panel("<strong>"+name+"</strong>"+"是一个多义项，请选择下面其中一项", data['polys']);
+            }
+        });
+    });
+
+    function draw_graph(sub_graphs) {
+        var i,
+            s,
+            o,
+            N = 100,
+            E = 100,
+            C = 5,
+            d = 0.5,
+            cs = [],
+            g = {
+                nodes: [],
+                edges: []
+            };
+
+        for (i = 0; i < sub_graphs['nodes'].length; i++) {
+            console.log(sub_graphs['nodes'][i]);
+            g.nodes.push(sub_graphs['nodes'][i]);
+        }
+        for (i = 0; i < sub_graphs['edges'].length; i++) {
+            g.edges.push(sub_graphs['edges'][i]);
+        }
+
+        s = new sigma({
+            graph: g,
+            renderer: {
+                container: 'vis-container',
+                type: 'canvas'
+            },
+            settings: {
+                labelThreshold: 0,
+                edgeLabelSize: 'proportional',
+                edgeLabelThreshold: 0,
+                minEdgeSize: 0.5,
+                maxEdgeSize: 1,
+                minNodeSize: 5,
+                maxNodeSize: 30,
+                dragNodeStickiness: 0.01,
+                nodeBorderSize: 2,
+                defaultNodeBorderColor: '#000',
+                enableEdgeHovering: false,
+                edgeHoverHighlightNodes: 'circle'
+            }
+        });
+        var color = "#bde1cd";
+
+// Configure the Fruchterman-Reingold algorithm:
+
+        var frListener = sigma.layouts.fruchtermanReingold.configure(s, {
+            iterations: 500,
+            easing: 'quadraticInOut',
+            duration: 800
+        });
+
+// Bind the events:
+        frListener.bind('start stop interpolate', function(e) {
+            console.log(e.type);
+        });
+
+// Start the Fruchterman-Reingold algorithm:
+        sigma.layouts.fruchtermanReingold.start(s);
+
+        //var fa = s.startForceAtlas2({worker: true, autoStop : true});
+
+        var config = {
+            node: [{
+                show: 'rightClickNode',
+                cssClass: 'sigma-tooltip',
+                position: 'right',
+                //autoadjust: true,
+                renderer: function(node) {
+                    // The function context is s.graph
+                    // Returns an HTML string:
+                    var table = "";
+                    for(var key in node.data){
+                        table += '<tr><th>'+key+'</th>'+'<td>' + node.data[key] + '</td></tr>';
+                    }
+                    var str = '<div class="arrow"></div>' +
+                              ' <div class="sigma-tooltip-header">'+node.label+'</div>' +
+                              '  <div class="sigma-tooltip-body">' +
+                              '    <table>' + table +
+                              '    </table>' +
+                              '  </div>';
+                    return str;
+                    // Returns a DOM Element:
+                    //var el = document.createElement('div');
+                    //return el.innerHTML = Mustache.render(template, node);
+                }
+            }]
+        };
+
+        var tooltips = sigma.plugins.tooltips(s, s.renderers[0], config);
+        // Instanciate the ActiveState plugin:
+        var activeState = sigma.plugins.activeState(s);
+
+// Initialize the dragNodes plugin:
+        var dragListener = sigma.plugins.dragNodes(s, s.renderers[0], activeState);
+
+// Initialize the Select plugin:
+        var select = sigma.plugins.select(s, activeState);
+
+// Initialize the Keyboard plugin:
+        var keyboard = sigma.plugins.keyboard(s, s.renderers[0]);
+
+// Bind the Keyboard plugin to the Select plugin:
+        select.bindKeyboard(keyboard);
+
+// Curve parallel edges:
+        //sigma.canvas.edges.autoCurve(s);
+        //s.refresh();
+
+        dragListener.bind('startdrag', function(event) {
+            console.log(event);
+        });
+        dragListener.bind('drag', function(event) {
+            console.log(event);
+        });
+        dragListener.bind('drop', function(event) {
+            console.log(event);
+        });
+        dragListener.bind('dragend', function(event) {
+            console.log(event);
+        });
+        var msg = '显示 <strong>'+sub_graphs['nodes'].length+'</strong> 个结点，<strong>'+sub_graphs['edges'].length + '</strong>条边';
+        show_msg(msg, 'info', 5000);
+    }
+
+    $(document).on("click", "a.page-link", function () {
+        var url = "/query/extend/page/";
+        var id = $(this).attr("id");
+        if(id == "pre"){
+            if(page == 0){
+                return;
+            }
+            page -= 1;
+        }
+        else{
+            if(page == num_of_pages - 1){
+                return;
+            }
+            page += 1;
+        }
+        console.log(page);
+        $.post(url, JSON.stringify({"page": page}), function (data, status) {
+            write_content(data['data']);
+        });
+
+    });
+
+    $(document).on("click", "a.dis-item", function () {
+        key_url = $(this).attr("href").split('#').slice(1,3);
+        dis_entities[key_url[0]]['uid'] = key_url[1];
+        dis_entities[key_url[0]]['filled'] = true;
+        var dis = false;
+        for(var key in dis_entities){
+            console.log(dis_entities[key]);
+            if(!dis_entities[key]['filled']){
+                dis = true;
+                break;
+            }
+        }
+        if(!dis){
+            for(var key in dis_entities){
+                blocked_query[key] = dis_entities[key]['uid'];
+            }
+            console.log(blocked_query);
+            loading();
+            $.post(blocked_url, JSON.stringify(blocked_query), function (data, status) {
+                $("#disambiguation").html("");
+                num_of_pages = data['pages'];
+                write_content(data['data']);
+                loading_finished();
+            })
+        }
+    });
+
+    $("#extend-query-submit-btn").click(function () {
+        var entity_card_str = $("#entity-card-tab").attr('class');
+        var rel_eg_str = $("#rel-eg-tab").attr('class');
+        var entity_retrieval_str = $("#entity-retrieval-tab").attr('class');
+        var connect_str = $("#connect-tab").attr('class');
+        if(entity_card_str.includes("active")){
+            selected_fun = "entity-card-tab";
+        }else if(rel_eg_str.includes("active")){
+            selected_fun = "rel-eg-tab";
+        }else if(entity_retrieval_str.includes("active")){
+            selected_fun = "entity-retrieval-tab";
+        }else if(connect_str.includes("active")){
+            selected_fun = "connect-tab";
+        }else{
+            console.log("Submit Unknow Tab selected");
+        }
+        refresh_setting();
+        if (selected_fun == "entity-card-tab") {
+            console.log("Extend " + selected_fun);
+            clear_canvas();
+            entity_card();
+        }
+        else if (selected_fun == "rel-eg-tab") {
+            console.log("Extend " + selected_fun);
+            page = 0;
+            clear_canvas();
+            rel_eg();
+        }
+        else if (selected_fun == "entity-retrieval-tab") {
+            console.log("Extend " + selected_fun);
+            page = 0;
+            clear_canvas();
+            entity_retrieval();
+        }
+        else if (selected_fun == "connect-tab") {
+            console.log("Extend " + selected_fun);
+            page = 0;
+            clear_canvas();
+            connect();
+        }
+        else {
+            console.log("Extend Unknow tab selected")
+        }
+    });
+</script>
+</body>
+</html>
